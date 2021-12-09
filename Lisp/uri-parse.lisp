@@ -348,16 +348,20 @@
   (make-uri :scheme (coerce-to-string (first urielements))
             :userinfo (coerce-to-string (second urielements))
             :host (coerce-to-string (third urielements))
-            :port (if (and (or
-                            (string=
-                             (coerce-to-string (first urielements))
-                             "http")
-                            (string=
-                             (coerce-to-string (first urielements))
-                             "https")) 
-                           (eq
-                            (coerce-to-string (fourth urielements))
-                            nil))
+            ;:port (if (and (or
+            ;                (string=
+            ;                 (coerce-to-string (first urielements))
+            ;                 "http")
+            ;                (string=
+            ;                 (coerce-to-string (first urielements))
+            ;                 "https")) 
+            ;               (eq
+            ;                (coerce-to-string (fourth urielements))
+            ;                nil))
+            ;          "80"
+            ;        (coerce-to-string (fourth urielements)))
+            :port (if
+                      (eq (coerce-to-string (fourth urielements)) nil)
                       "80"
                     (coerce-to-string (fourth urielements)))
             :path (coerce-to-string (fifth urielements))
