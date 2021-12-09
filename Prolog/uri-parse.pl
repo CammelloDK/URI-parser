@@ -14,7 +14,8 @@ uri_parse(URIString, URI) :-
 	build(Scheme1, Scheme),
 	build(Userinfo1, Userinfo),
 	build(Host1, Host),
-	build(Port1, Port),
+	build(Port1, Port2),
+	check_default_port(Port2, Port),
 	build(Path1, Path),
 	build(Query1, Query),
 	build(Fragment1, Fragment).
@@ -26,6 +27,13 @@ build(List, Result) :-
 	atom_chars(List1, List),
 	string_to_atom(Result, List1).
 
+% Predicato che controlla la presenza di una porta;
+% in caso mancasse, viene assegnata la '80' di default
+check_default_port(Port, Port1) :-
+	%Scheme == "http";
+	%Scheme == "https",
+	Port == [] -> Port1 = 80;
+	Port1 = Port.
 
 % INIZIO CONTROLLO SCHEME
 
@@ -86,43 +94,6 @@ scheme([C1, C2, C3, C4 | Cs],
 	C4 == ':',
 	!,
 	scheme_tel_fax(Cs, Userinfo).
-
-
-% NON VA!
-% In caso di http/https senza porta, viene assegnata
-% la 80 di default
-%scheme([C1, C2, C3, C4, C5 | Cs],
-%       [C1, C2, C3, C4],
-%       Userinfo, Host, [], Path, Query, Fragment) :-
-%	C1 == 'h',
-%	C2 == 't',
-%	C3 == 't',
-%	C4 == 'p',
-%	C5 == ':',
-%	%Port == [],
-%	!,
-%	Port = 80,
-%	%id(Cs, Cs1, Scheme),
-%	%print(Port),
-%	scheme_2(Cs, Userinfo, Host, Port, Path, Query, Fragment).
-
-%scheme([C1, C2, C3, C4, C5, C6 | Cs],
-%       [C1, C2, C3, C4, C5],
-%       Userinfo, Host, [], Path, Query, Fragment) :-
-%	C1 == 'h',
-%	C2 == 't',
-%	C3 == 't',
-%	C4 == 'p',
-%	C5 == 's',
-%	C6 == ':',
-%	%Port == [],
-%	!,
-%	Port = 80,
-%	%id(Cs, Cs1, Scheme),
-%	%print(Port),
-%	scheme_2(Cs, Userinfo, Host, Port, Path, Query, Fragment).
-
-
 
 % Nel caso in cui non coincida con nessuno scheme specifico
 % si effetua il check che lo scheme sia un ID valido
@@ -364,7 +335,7 @@ port_2([C | Cs], Cs1, [C | Port]) :-
 	digit(C),
 	!,
 	port_2(Cs, Cs1, Port).
-port_2(Cs, Cs, []).
+port_2(Cs, Cs, []) .
 
 % Riconosce un indirizzo IP; composto da quattro gruppi di tre digit
 % divisi da un '.'
@@ -414,9 +385,20 @@ merge_list([A | As], Bs, [A | Cs]) :-
 % uri_display/1 string
 % Riceve in input una stringa contenente l'URI
 % e stampa ogni suo componente
-uri_display("") :- !.
-uri_display(URIString) :-
-	uri_display(URIString, _).
+%uri_display("") :- !.
+%uri_display(URIString) :-
+%uri_display(URIString, _).
+
+uri_display(uri(Scheme, Userinfo, Host, Port, Path, Query, Fragment)) :-
+	List = [Scheme, Userinfo, Host, Port, Path, Query, Fragment],
+	uri_display(List, 0).
+	%print(Scheme),
+	%print(Userinfo),
+	%print(Host),
+	%print(Port),
+	%print(Path),
+	%print(Query),
+	%print(Fragment).
 
 % uri_display/2 string URI
 % Variante del predicato 'uri_parse' in cui l'URI
@@ -435,7 +417,8 @@ uri_display(URIString, URIStamp) :-
 	build(Scheme1, Scheme),
 	build(Userinfo1, Userinfo),
 	build(Host1, Host),
-	build(Port1, Port),
+	build(Port1, Port2),
+	check_default_port(Port2, Port),
 	build(Path1, Path),
 	build(Query1, Query),
 	build(Fragment1, Fragment),
