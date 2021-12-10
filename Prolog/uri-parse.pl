@@ -30,8 +30,6 @@ build(List, Result) :-
 % Predicato che controlla la presenza di una porta;
 % in caso mancasse, viene assegnata la '80' di default
 check_default_port(Port, Port1) :-
-	%Scheme == "http";
-	%Scheme == "https",
 	Port == [] -> Port1 = 80;
 	Port1 = Port.
 
@@ -95,6 +93,24 @@ scheme([C1, C2, C3, C4 | Cs],
 	!,
 	scheme_tel_fax(Cs, Userinfo).
 
+% Check scheme, se uguale a 'zos'
+% si passa al controllo specifico 'scheme_zos'
+%scheme([C1, C2, C3, C4 | Cs],
+%       [C1, C2, C3],
+%       Userinfo,
+%       Host,
+%       Port,
+%       Path,
+%       Query,
+%       Fragment) :-
+%	C1 == 'z',
+%	C2 == 'o',
+%	C3 == 's',
+%	C4 == ':',
+%	!,
+%	scheme_zos(Cs, Userinfo, Host, Port, Path, Query, Fragment).
+
+
 % Nel caso in cui non coincida con nessuno scheme specifico
 % si effetua il check che lo scheme sia un ID valido
 % e si passa al controllo 'scheme_2'
@@ -137,6 +153,9 @@ scheme_news(Cs, Host) :-
 
 scheme_tel_fax(Cs, Userinfo) :-
 	id(Cs, [], Userinfo).
+
+%scheme_zos() :- .
+
 
 % FINE CONTROLLO SCHEME
 
@@ -379,98 +398,65 @@ merge_list(As, [], As) :- !.
 merge_list([A | As], Bs, [A | Cs]) :-
 	merge_list(As, Bs, Cs).
 
+
 % Predicati "utilities" per stampare in modo testuale
 % un URI
 
-% uri_display/1 string
-% Riceve in input una stringa contenente l'URI
-% e stampa ogni suo componente
-%uri_display("") :- !.
-%uri_display(URIString) :-
-%uri_display(URIString, _).
-
+% uri_display/1 URI
+% Riceve in input un termine composto contenente
+% tutte le componenti dell'URI, crea una lista
+% e chiama 'uri_print/2' per la stampa a terminale
 uri_display(uri(Scheme, Userinfo, Host, Port, Path, Query, Fragment)) :-
-	List = [Scheme, Userinfo, Host, Port, Path, Query, Fragment],
-	uri_display(List, 0).
-	%print(Scheme),
-	%print(Userinfo),
-	%print(Host),
-	%print(Port),
-	%print(Path),
-	%print(Query),
-	%print(Fragment).
-
-% uri_display/2 string URI
-% Variante del predicato 'uri_parse' in cui l'URI
-% viene scomposto in ogni suo componente per comporre una lista.
-% Viene stampata sia la lista di tutti i componenti,
-% sia l'URI in formato testuale
-uri_display(URIString, URIStamp) :-
-
-	URIStamp = [Scheme, Userinfo, Host, Port, Path, Query, Fragment],
-
-	string_to_atom(URIString, URIAtom),
-	atom_chars(URIAtom, URIChars),
-
-	scheme(URIChars, Scheme1, Userinfo1, Host1, Port1, Path1, Query1, Fragment1),
-
-	build(Scheme1, Scheme),
-	build(Userinfo1, Userinfo),
-	build(Host1, Host),
-	build(Port1, Port2),
-	check_default_port(Port2, Port),
-	build(Path1, Path),
-	build(Query1, Query),
-	build(Fragment1, Fragment),
-	uri_display(URIStamp, 0).
-
-% uri_display/2 List Index
-% Riceve in input una lista di componenti URI e la stampa testualmente
-% anteponendo al componente il suo nome identificativo.
-% L'Index serve per creare una sorta di "switch case"
-uri_display([], _) :- !.
-uri_display([A|B], N) :-
-
-	N == 0 -> string_upper(A, U),
+	string_upper(Scheme, SchemeUpper),
 	write("Scheme: "),
-	writeln(U),
-	N1 is N + 1,
-	uri_display(B, N1);
-
-	N == 1 -> write("Userinfo: "),
-	print(A),
+	writeln(SchemeUpper),
+	write("Userinfo: "),
+	print(Userinfo),
 	writeln(""),
-	N1 is N + 1,
-	uri_display(B, N1);
-
-	N == 2 -> write("Host: "),
-	print(A),
+	write("Host: "),
+	print(Host),
 	writeln(""),
-	N1 is N + 1,
-	uri_display(B, N1);
-
-	N == 3 -> write("Port: "),
-	writeln(A),
-	N1 is N + 1,
-	uri_display(B, N1);
-
-	N == 4 -> write("Path: "),
-	print(A),
+	write("Port: "),
+	writeln(Port),
+	write("Path: "),
+	print(Path),
 	writeln(""),
-	N1 is N + 1,
-	uri_display(B, N1);
+	write("Query: "),
+	print(Query),
+	writeln(""),
+	write("Fragment: "),
+	print(Fragment),
+	writeln(""),
+	writeln("").
 
-	N == 5 -> write("Query: "),
-	print(A),
-	writeln(""),
-	N1 is N + 1,
-	uri_display(B, N1);
-
-	N == 6 -> write("Fragment: "),
-	print(A),
-	writeln(""),
-	writeln(""),
-	N1 is N + 1,
-	uri_display(B, N1).
+% uri_display/2 URI Stream
+% Riceve in input un termine composto contenente
+% tutte le componenti dell'URI ed uno stream;
+% chiama 'uri_print/3' per la stampa su Stream
+% E.G. stampa su file
+uri_display(uri(Scheme, Userinfo, Host, Port, Path, Query, Fragment),
+	    Stream) :-
+	string_upper(Scheme, SchemeUpper),
+	write(Stream, "Scheme: "),
+	writeln(Stream, SchemeUpper),
+	write(Stream, "Userinfo: "),
+	print(Stream, Userinfo),
+	writeln(Stream, ""),
+	write(Stream, "Host: "),
+	print(Stream, Host),
+	writeln(Stream, ""),
+	write(Stream, "Port: "),
+	writeln(Stream, Port),
+	write(Stream, "Path: "),
+	print(Stream, Path),
+	writeln(Stream, ""),
+	write(Stream, "Query: "),
+	print(Stream, Query),
+	writeln(Stream, ""),
+	write(Stream, "Fragment: "),
+	print(Stream, Fragment),
+	writeln(Stream, ""),
+	writeln(Stream, ""),
+	close(Stream).
 
 %%%% end of file -- uri-parse
