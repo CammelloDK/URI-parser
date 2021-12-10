@@ -151,12 +151,14 @@
         (s (sym-to-list list #\:)))
     (if (is-scheme l) 
         (cond ((equal l '(#\m #\a #\i #\l #\t #\o)) 
-               (mailto-ss s (list l)))           
+               (mailto-scheme s (list l)))
+              ;((equal l '(#\z #\o #\s))
+               ;(zos-scheme s (list l)))
               ((equal l '(#\n #\e #\w #\s)) 
-               (news-ss s (list l)))
+               (news-scheme s (list l)))
               ((or (equal l '(#\t #\e #\l))
                    (equal l '(#\f #\a #\x))) 
-               (telfax-ss s (list l)))
+               (telfax-scheme s (list l)))
               (t (if (and (eq (car s) #\/)
                           (eq (car (cdr s)) #\/))
                      (first-uri-type s (list l)) 
@@ -183,7 +185,7 @@
                            '(nil)))))
 
 ;; MAILTO
-(defun mailto-ss (list urielements)
+(defun mailto-scheme (list urielements)
   (if (is-userinfo list) (uri-build (append urielements (list list)))
     (if (is-userinfo (list-to-sym list #\@)) 
         (host-opt (sym-to-list list #\@) 
@@ -194,7 +196,7 @@
           identifier := chars without {/ ? # @ :}"))))
 
 ;; NEWS
-(defun news-ss (list urielements)
+(defun news-scheme (list urielements)
   (if (is-host list) (uri-build (append urielements (list nil list)))
     (error "NOT VALID HOST: HOST IS OBLIGATORY
           definition of HOST:
@@ -202,12 +204,18 @@
           host-identifier := chars without {. / ? # @ :}")))
 
 ;; TELFAX
-(defun telfax-ss (list urielements)
+(defun telfax-scheme (list urielements)
   (if (is-userinfo list) (uri-build (append urielements (list list)))
     (error "NOT VALID USERINFO: USERINFO IS OBLIGATORY
           definition of USERINFO:
           userinfo := <identifier>
           identifier := chars without {/ ? # @ :}")))
+
+;; ZOS
+;(defun zos-scheme (list urielements)
+;  (if () ()
+;    (error "")))
+  
 
 ;; Presenza facoltativa di
 ;; ['@' userinfo]
