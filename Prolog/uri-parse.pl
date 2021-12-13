@@ -6,7 +6,7 @@ uri_parse(URIString, URI) :-
 
 	URI = uri(Scheme, Userinfo, Host, Port, Path, Query, Fragment),
 
-	string_to_atom(URIString, URIAtom),
+	atom_string(URIAtom, URIString),
 	atom_chars(URIAtom, URIChars),
 
 	scheme(URIChars, Scheme1, Userinfo1, Host1, Port1, Path1, Query1, Fragment1),
@@ -20,18 +20,22 @@ uri_parse(URIString, URI) :-
 	build(Query1, Query),
 	build(Fragment1, Fragment).
 
-% Predicato che converte la stringa in output.
-% In caso di stringa vuota non viene convertita
+% Predicato che converte l'atomo in output.
+% In caso di atomo vuoto non viene convertito
 build([], []) :- !.
 build(List, Result) :-
-	atom_chars(List1, List),
-	string_to_atom(Result, List1).
+	atom_chars(Result, List).
+	%atom_string(Result, List1).
 
 % Predicato che controlla la presenza di una porta;
-% in caso mancasse, viene assegnata la '80' di default
-check_default_port(Port, Port1) :-
-	Port == [] -> Port1 = 80;
-	Port1 = Port.
+% in caso mancasse, viene assegnata la '80' di default.
+% In caso NON mancasse, l'atomo viene convertito in
+% numero
+check_default_port([], 80) :- !.
+check_default_port(Port, Port2) :-
+	%Port == [] -> Port2 = 80;
+	atom_chars(Port, Port1),
+	number_chars(Port2, Port1).
 
 % INIZIO CONTROLLO SCHEME
 
@@ -405,58 +409,66 @@ merge_list([A | As], Bs, [A | Cs]) :-
 % uri_display/1 URI
 % Riceve in input un termine composto contenente
 % tutte le componenti dell'URI, crea una lista
-% e chiama 'uri_print/2' per la stampa a terminale
+% e le stampa a terminale
 uri_display(uri(Scheme, Userinfo, Host, Port, Path, Query, Fragment)) :-
 	string_upper(Scheme, SchemeUpper),
-	write("Scheme: "),
-	writeln(SchemeUpper),
-	write("Userinfo: "),
-	print(Userinfo),
-	writeln(""),
-	write("Host: "),
-	print(Host),
-	writeln(""),
-	write("Port: "),
-	writeln(Port),
-	write("Path: "),
-	print(Path),
-	writeln(""),
-	write("Query: "),
-	print(Query),
-	writeln(""),
-	write("Fragment: "),
-	print(Fragment),
-	writeln(""),
-	writeln("").
+	format('Scheme: ~s~n', SchemeUpper),
+
+	empty_or_quotes(Userinfo, StrUserinfo),
+	format('Userinfo: ~s~n', StrUserinfo),
+
+	empty_or_quotes(Host, StrHost),
+	format('Host: ~s~n', StrHost),
+
+	format('Port: ~d~n', Port),
+
+	empty_or_quotes(Path, StrPath),
+	format('Path: ~s~n', StrPath),
+
+	empty_or_quotes(Query, StrQuery),
+	format('Query: ~s~n', StrQuery),
+
+	empty_or_quotes(Fragment, StrFragment),
+	format('Fragment: ~s~n~n', StrFragment).
 
 % uri_display/2 URI Stream
 % Riceve in input un termine composto contenente
 % tutte le componenti dell'URI ed uno stream;
-% chiama 'uri_print/3' per la stampa su Stream
 % E.G. stampa su file
 uri_display(uri(Scheme, Userinfo, Host, Port, Path, Query, Fragment),
 	    Stream) :-
 	string_upper(Scheme, SchemeUpper),
-	write(Stream, "Scheme: "),
-	writeln(Stream, SchemeUpper),
-	write(Stream, "Userinfo: "),
-	print(Stream, Userinfo),
-	writeln(Stream, ""),
-	write(Stream, "Host: "),
-	print(Stream, Host),
-	writeln(Stream, ""),
-	write(Stream, "Port: "),
-	writeln(Stream, Port),
-	write(Stream, "Path: "),
-	print(Stream, Path),
-	writeln(Stream, ""),
-	write(Stream, "Query: "),
-	print(Stream, Query),
-	writeln(Stream, ""),
-	write(Stream, "Fragment: "),
-	print(Stream, Fragment),
-	writeln(Stream, ""),
-	writeln(Stream, ""),
+	format(Stream, 'Scheme: ~s~n', SchemeUpper),
+
+	empty_or_quotes(Userinfo, StrUserinfo),
+	format(Stream, 'Userinfo: ~s~n', StrUserinfo),
+
+	empty_or_quotes(Host, StrHost),
+	format(Stream, 'Host: ~s~n', StrHost),
+
+	format(Stream, 'Port: ~d~n', Port),
+
+	empty_or_quotes(Path, StrPath),
+	format(Stream, 'Path: ~s~n', StrPath),
+
+	empty_or_quotes(Query, StrQuery),
+	format(Stream, 'Query: ~s~n', StrQuery),
+
+	empty_or_quotes(Fragment, StrFragment),
+	format(Stream, 'Fragment: ~s~n~n', StrFragment),
+
 	close(Stream).
+
+% Cercando di stampare con format un elemento
+% vuoto [] segnalava un errore.
+% Questo predicato converte l'elemento vuoto
+% [] in un atomo '[]'.
+% Inoltre in caso non sia vuoto aggiunge gli apici
+empty_or_quotes([], '[]') :- !.
+empty_or_quotes(Elem, StrElem) :-
+	%Elem == [] -> StrElem = '[]';
+	atom_concat('\'', Elem, Tmp),
+	atom_concat(Tmp, '\'', StrElem).
+
 
 %%%% end of file -- uri-parse
