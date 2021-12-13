@@ -377,14 +377,14 @@
             :fragment (coerce-to-string (seventh urielements))))
 
 ;; Funzione di stampa di tutti gli elementi dell'URI
-(defun uri-display (uri)
-  (format t "Scheme:   ~A~%" (string-upcase (uri-scheme uri)))
-  (format t "Userinfo: ~S~%" (uri-userinfo uri))
-  (format t "Host:     ~S~%" (uri-host uri))
-  (format t "Port:     ~A~%" (uri-port uri))
-  (format t "Path:     ~S~%" (uri-path uri))
-  (format t "Query:    ~S~%" (uri-query uri))
-  (format t "Fragment: ~S~%" (uri-fragment uri))
+(defun uri-display (uri &optional (stream *standard-output*))
+  (format stream "Scheme:   ~A~%" (string-upcase (uri-scheme uri)))
+  (format stream "Userinfo: ~A~%" (uri-userinfo uri))
+  (format stream "Host:     ~S~%" (uri-host uri))
+  (format stream "Port:     ~A~%" (uri-port uri))
+  (format stream "Path:     ~S~%" (uri-path uri))
+  (format stream "Query:    ~S~%" (uri-query uri))
+  (format stream "Fragment: ~S~%~%" (uri-fragment uri))
   (values)) ; Utile a rimuovere NIL nell'output
 
 ;; FUNZIONI DI SUPPORTO
@@ -430,5 +430,20 @@
         as j = (position '#\. string :start i)
         collect (subseq string i j)
         while j))
+
+;;; TEST
+(defparameter disco (uri-parse "https://disco.unimib.it"))
+
+(defparameter zos (uri-parse "zos://me@hercules.disco.unimib.it:372/myproj.linalg.fortran(svd)?submit=FORTXC#ID=7"))
+
+(defparameter filestamp-zos 
+  (with-open-file
+      (stream "/Users/Visma/Downloads/LP/ProgettoURI/Vismara_Diego_844796_LP_E1P_2022/Lisp/outputfile.txt" :if-does-not-exist :create :if-exists :append :direction :output)
+    (uri-display zos stream)))
+
+(defparameter filestamp-disco 
+  (with-open-file
+      (stream "/Users/Visma/Downloads/LP/ProgettoURI/Vismara_Diego_844796_LP_E1P_2022/Lisp/outputfile.txt" :if-does-not-exist :create :if-exists :append :direction :output)
+    (uri-display disco stream)))
 
 ;;;; end of file -- uri-parse.lisp
