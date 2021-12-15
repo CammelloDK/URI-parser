@@ -6,7 +6,7 @@
 (defstruct uri scheme userinfo host port path query fragment)
 
 ;; Funzione principale
-;; uri-parse:  string --> list
+;; uri-parse:  string -> list
 (defun uri-parse (string)
   (let ((list (coerce-to-list string)))
     (if (null list) (error "Empty is not a URI")
@@ -16,7 +16,10 @@
 ;; <query, fragment, host-identifier, identifier, digit>
 (defun is-query (list)
   (if (null list) nil
-    (eval (cons 'and (mapcar (lambda (char) (if (eq char #\#) nil t)) list)))))
+    (eval (cons 'and (mapcar (lambda (char)
+                               (if (eq char #\#)
+                                   nil t))
+                             list)))))
 
 (defun is-fragment (list)
   (if (null list) nil
@@ -82,7 +85,7 @@
                    (octet-length y)
                    (octet-length w)
                    (octet-length z))
-              T nil))))))
+              t nil))))))
 
 ;; Controlla che l'ottetto sia composto da 1 a 3 cifre
 (defun octet-length (oct)
@@ -92,9 +95,10 @@
 
 ;; Controlla che l'ottetto sia un numero
 (defun octet-is-number (oct)
-  (cond ((null oct) T)
+  (cond ((null oct) t)
 	((to-number (first oct)) (octet-is-number (cdr oct)))
 	((not (to-number (first oct))) nil)))
+
 
 ;; Definizione sintattica di scheme
 (defun is-scheme (list)
@@ -186,14 +190,14 @@
 
 ;; MAILTO
 (defun mailto-scheme (list urielements)
-  (if (is-userinfo list) (uri-build (append urielements (list list)))
+  ;(if (is-userinfo list) (uri-build (append urielements (list list)))
     (if (is-userinfo (list-to-sym list #\@)) 
         (host-opt (sym-to-list list #\@) 
                   (append urielements (list (list-to-sym list #\@))))
       (error "NOT VALID USERINFO: USERINFO IS OBLIGATORY
           definition of USERINFO:
           userinfo := <identifier>
-          identifier := chars without {/ ? # @ :}"))))
+          identifier := chars without {/ ? # @ :}")))
 
 ;; NEWS
 (defun news-scheme (list urielements)
@@ -315,7 +319,7 @@
         ((is-path (list-to-sym list #\#)) 
          (fragment-opt (sym-to-list list #\#)
                        (append urielements 
-                               (list (sym-to-list list #\#)) 
+                               (list (list-to-sym list #\#)) 
                                '(nil))))
         (t (error "NOT VALID PATH 
           definition of PATH: 
@@ -356,18 +360,6 @@
   (make-uri :scheme (coerce-to-string (first urielements))
             :userinfo (coerce-to-string (second urielements))
             :host (coerce-to-string (third urielements))
-            ;:port (if (and (or
-            ;                (string=
-            ;                 (coerce-to-string (first urielements))
-            ;                 "http")
-            ;                (string=
-            ;                 (coerce-to-string (first urielements))
-            ;                 "https")) 
-            ;               (eq
-            ;                (coerce-to-string (fourth urielements))
-            ;                nil))
-            ;          "80"
-            ;        (coerce-to-string (fourth urielements)))
             :port (if
                       (eq (coerce-to-string (fourth urielements)) nil)
                       "80"
@@ -385,15 +377,17 @@
   (format stream "Path:     ~S~%" (uri-path uri))
   (format stream "Query:    ~S~%" (uri-query uri))
   (format stream "Fragment: ~S~%~%" (uri-fragment uri))
-  (values)) ; Utile a rimuovere NIL nell'output
+  t)
 
 ;; FUNZIONI DI SUPPORTO
 ;; Rende gli output maggiormente comprensibili
+;; list -> string
 (defun coerce-to-string (list)
   (if (null list) nil
     (coerce list 'string)))
 
 ;; Genera una lista di caratteri
+;; string -> list
 (defun coerce-to-list (string)
   (coerce string 'list))
 
@@ -430,20 +424,5 @@
         as j = (position '#\. string :start i)
         collect (subseq string i j)
         while j))
-
-;;; TEST
-(defparameter disco (uri-parse "https://disco.unimib.it"))
-
-(defparameter zos (uri-parse "zos://me@hercules.disco.unimib.it:372/myproj.linalg.fortran(svd)?submit=FORTXC#ID=7"))
-
-(defparameter filestamp-zos 
-  (with-open-file
-      (stream "/Users/Visma/Downloads/LP/ProgettoURI/Vismara_Diego_844796_LP_E1P_2022/Lisp/outputfile.txt" :if-does-not-exist :create :if-exists :append :direction :output)
-    (uri-display zos stream)))
-
-(defparameter filestamp-disco 
-  (with-open-file
-      (stream "/Users/Visma/Downloads/LP/ProgettoURI/Vismara_Diego_844796_LP_E1P_2022/Lisp/outputfile.txt" :if-does-not-exist :create :if-exists :append :direction :output)
-    (uri-display disco stream)))
 
 ;;;; end of file -- uri-parse.lisp
