@@ -147,7 +147,6 @@ scheme_mailto(Cs, Userinfo, Host) :-
 	id(Cs, Cs1, Userinfo),
 	scheme_mailto_2(Cs1, Host).
 
-scheme_mailto_2([], []) :- !.
 scheme_mailto_2([C | Cs], Host) :-
 	C == '@',
 	host(Cs, [], Host).
