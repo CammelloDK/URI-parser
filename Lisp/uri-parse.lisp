@@ -8,9 +8,8 @@
 ;; Funzione principale
 ;; uri-parse:  string -> list
 (defun uri-parse (string)
-  (let ((list (coerce-to-list string)))
-    (if (null list) (error "Empty is not a URI")
-      (check-scheme list))))
+    (if (null (coerce-to-list string)) (error "Empty is not a URI")
+      (check-scheme (coerce-to-list string))))
 
 ;; Queste funzioni definiscono i vari elementi dell'URI
 ;; <query, fragment, host-identifier, identifier, digit>
@@ -73,19 +72,35 @@
 ;; Questa funzione, con relative funzioni di supporto, effettua il check
 ;; della struttura di un indirizzo IP
 (defun is-ip (ip)
-  (let ((a (split-by-point (coerce (coerce-to-string ip) 'string))))
-    (let ((b (mapcar 'coerce-to-list a)))
-      (if (not (eq (length b) 4)) 
+      (if (not (eq 
+                (length 
+                 (mapcar 'coerce-to-list (split-by-point 
+                                          (coerce (coerce-to-string ip) 
+                                                  'string)))) 
+                4)) 
 	  nil
-        (let ((x (first b))
-              (y (second b))
-              (w (third b))
-              (z (fourth b)))
-          (if (and (octet-length x)
-                   (octet-length y)
-                   (octet-length w)
-                   (octet-length z))
-              t nil))))))
+          (if (and 
+               (octet-length 
+                (first 
+                 (mapcar 'coerce-to-list (split-by-point 
+                                          (coerce (coerce-to-string ip) 
+                                                  'string)))))
+                   (octet-length 
+                    (second 
+                     (mapcar 'coerce-to-list (split-by-point 
+                                              (coerce (coerce-to-string ip) 
+                                                      'string)))))
+                   (octet-length 
+                    (third 
+                     (mapcar 'coerce-to-list (split-by-point 
+                                              (coerce (coerce-to-string ip) 
+                                                      'string)))))
+                   (octet-length 
+                    (fourth 
+                     (mapcar 'coerce-to-list (split-by-point 
+                                              (coerce (coerce-to-string ip) 
+                                                      'string))))))
+              t nil)))
 
 ;; Controlla che l'ottetto sia composto da 1 a 3 cifre
 (defun octet-length (oct)
@@ -151,26 +166,29 @@
 ;; Funzione check-scheme comincia il parsing
 ;; e riconosce il tipo di URI
 (defun check-scheme (list)
-  (let ((l (list-to-sym list #\:))
-        (s (sym-to-list list #\:)))
-    (if (is-scheme l) 
-        (cond ((equal l '(#\m #\a #\i #\l #\t #\o)) 
-               (mailto-scheme s (list l)))
-              ;((equal l '(#\z #\o #\s))
-               ;(zos-scheme s (list l)))
-              ((equal l '(#\n #\e #\w #\s)) 
-               (news-scheme s (list l)))
-              ((or (equal l '(#\t #\e #\l))
-                   (equal l '(#\f #\a #\x))) 
-               (telfax-scheme s (list l)))
-              (t (if (and (eq (car s) #\/)
-                          (eq (car (cdr s)) #\/))
-                     (first-uri-type s (list l)) 
-                   (second-uri-type s (list l)))))
+    (if (is-scheme (list-to-sym list #\:)) 
+        (cond ((equal (list-to-sym list #\:) '(#\m #\a #\i #\l #\t #\o)) 
+               (mailto-scheme (sym-to-list list #\:) 
+                              (list (list-to-sym list #\:))))
+              ;((equal (list-to-sym list #\:) '(#\z #\o #\s))
+               ;(zos-scheme s (list (list-to-sym list #\:))))
+              ((equal (list-to-sym list #\:) '(#\n #\e #\w #\s)) 
+               (news-scheme (sym-to-list list #\:) 
+                            (list (list-to-sym list #\:))))
+              ((or (equal (list-to-sym list #\:) '(#\t #\e #\l))
+                   (equal (list-to-sym list #\:) '(#\f #\a #\x))) 
+               (telfax-scheme (sym-to-list list #\:) 
+                              (list (list-to-sym list #\:))))
+              (t (if (and (eq (car (sym-to-list list #\:)) #\/)
+                          (eq (car (cdr (sym-to-list list #\:))) #\/))
+                     (first-uri-type (sym-to-list list #\:) 
+                                     (list (list-to-sym list #\:))) 
+                   (second-uri-type (sym-to-list list #\:) 
+                                    (list (list-to-sym list #\:))))))
       (error "Not valid SCHEME: SCHEME IS OBLIGATORY
           definition of SCHEME:
           scheme := <identifier>
-          identifier := chars without {/ ? # @ :}"))))
+          identifier := chars without {/ ? # @ :}")))
 
 ;; URL
 (defun first-uri-type (list urielements)
@@ -224,21 +242,22 @@
 ;; Presenza facoltativa di
 ;; ['@' userinfo]
 (defun userinfo-opt (list urielements) 
-  (let ((l (list-to-sym list #\@))
-        (s (sym-to-list list #\@)))
-    (if (is-userinfo l) (host-obb s (append urielements (list l)))
-      (if (and (null l) (not (eq (car list) #\@)))
-          (if (null s)
+    (if 
+        (is-userinfo (list-to-sym list #\@)) 
+        (host-obb (sym-to-list list #\@) 
+                  (append urielements (list (list-to-sym list #\@))))
+      (if (and (null (list-to-sym list #\@)) (not (eq (car list) #\@)))
+          (if (null (sym-to-list list #\@))
               (host-obb list (append urielements
                                      '(nil)))
-            (host-obb s (append urielements
+            (host-obb (sym-to-list list #\@) (append urielements
                                 '(nil) 
-                                (list l))))
+                                (list (list-to-sym list #\@)))))
                       
         (error "NOT VALID USERINFO
           definition of USERINFO:
           userinfo := <identifier>
-          identifier := chars without {/ ? # @ :}")))))
+          identifier := chars without {/ ? # @ :}"))))
 
 ;; Presenza obbligatoria di
 ;; [host]
