@@ -381,8 +381,9 @@
             :host (coerce-to-string (third urielements))
             :port (if
                       (eq (coerce-to-string (fourth urielements)) nil)
-                      "80"
-                    (coerce-to-string (fourth urielements)))
+                      80
+                    (parse-integer 
+                     (coerce-to-string (fourth urielements))))
             :path (coerce-to-string (fifth urielements))
             :query (coerce-to-string (sixth urielements))
             :fragment (coerce-to-string (seventh urielements))))
@@ -392,7 +393,7 @@
   (format stream "Scheme:   ~A~%" (string-upcase (uri-scheme uri)))
   (format stream "Userinfo: ~A~%" (uri-userinfo uri))
   (format stream "Host:     ~S~%" (uri-host uri))
-  (format stream "Port:     ~A~%" (uri-port uri))
+  (format stream "Port:     ~D~%" (uri-port uri))
   (format stream "Path:     ~S~%" (uri-path uri))
   (format stream "Query:    ~S~%" (uri-query uri))
   (format stream "Fragment: ~S~%~%" (uri-fragment uri))

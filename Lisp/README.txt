@@ -10,10 +10,10 @@ Scheme, UserInfo, Host, Port (viene assegnata la 80 di default in caso non venga
 
 Esempi di chiamata:
 	(uri-parse "http://disco.unimib.it")
-	#S(URI :SCHEME "http" :USERINFO NIL :HOST "disco.unimib.it" :PORT "80" :PATH NIL :QUERY NIL :FRAGMENT NIL)
+	#S(URI :SCHEME "http" :USERINFO NIL :HOST "disco.unimib.it" :PORT 80 :PATH NIL :QUERY NIL :FRAGMENT NIL)
 
 	(uri-parse "telnet://192.168.0.3:267/")
-	#S(URI :SCHEME "telnet" :USERINFO NIL :HOST "192.168.0.3" :PORT "267" :PATH NIL :QUERY NIL :FRAGMENT NIL)
+	#S(URI :SCHEME "telnet" :USERINFO NIL :HOST "192.168.0.3" :PORT 267 :PATH NIL :QUERY NIL :FRAGMENT NIL)
 
 	(uri-parse "telnet://192.168.0..3:267/")
 	Error: NOT VALID HOST: HOST IS OBLIGATORY
@@ -22,13 +22,13 @@ Esempi di chiamata:
           host-identifier := chars without {. / ? # @ :}
 
 	(uri-parse "http://it.wikipedia.org/application/new_user/registration_form?nome=Mario&cognome=Rossi&ID_utente=M_Rossi")
-	#S(URI :SCHEME "http" :USERINFO NIL :HOST "it.wikipedia.org" :PORT "80" :PATH "application/new_user/registration_form" :QUERY "nome=Mario&cognome=Rossi&ID_utente=M_Rossi" :FRAGMENT NIL)
+	#S(URI :SCHEME "http" :USERINFO NIL :HOST "it.wikipedia.org" :PORT 80 :PATH "application/new_user/registration_form" :QUERY "nome=Mario&cognome=Rossi&ID_utente=M_Rossi" :FRAGMENT NIL)
 
 	(uri-parse "https://example.com:443/data.csv#row=4")
-	#S(URI :SCHEME "https" :USERINFO NIL :HOST "example.com" :PORT "443" :PATH "data.csv" :QUERY NIL :FRAGMENT "row=4")
+	#S(URI :SCHEME "https" :USERINFO NIL :HOST "example.com" :PORT 443 :PATH "data.csv" :QUERY NIL :FRAGMENT "row=4")
 
 	(uri-parse "mailto:someone@example.com")
-	#S(URI :SCHEME "mailto" :USERINFO "someone" :HOST "example.com" :PORT "80" :PATH NIL :QUERY NIL :FRAGMENT NIL)
+	#S(URI :SCHEME "mailto" :USERINFO "someone" :HOST "example.com" :PORT 80 :PATH NIL :QUERY NIL :FRAGMENT NIL)
 
 	(uri-parse "mailto:someoneexample.com")
 	Error: NOT VALID USERINFO: USERINFO IS OBLIGATORY
@@ -43,7 +43,7 @@ Esempi di chiamata:
           host-identifier := chars without {. / ? # @ :}
 
 	(uri-parse "news:comp.infosystems.www.servers.unix")
-	#S(URI :SCHEME "news" :USERINFO NIL :HOST "comp.infosystems.www.servers.unix" :PORT "80" :PATH NIL :QUERY NIL :FRAGMENT NIL)
+	#S(URI :SCHEME "news" :USERINFO NIL :HOST "comp.infosystems.www.servers.unix" :PORT 80 :PATH NIL :QUERY NIL :FRAGMENT NIL)
 
 	(uri-parse "news:comp.infosystems.www.servers.unix:24/weeklynews")
 	Error: NOT VALID HOST: HOST IS OBLIGATORY
@@ -53,13 +53,13 @@ Esempi di chiamata:
 	
 
 	(uri-parse "fax:+391234567890")
-	#S(URI :SCHEME "fax" :USERINFO "+391234567890" :HOST NIL :PORT "80" :PATH NIL :QUERY NIL :FRAGMENT NIL)
+	#S(URI :SCHEME "fax" :USERINFO "+391234567890" :HOST NIL :PORT 80 :PATH NIL :QUERY NIL :FRAGMENT NIL)
 
 	(uri-parse "ftp://ftp.is.co.za/rfc/rfc1808.txt")
-	#S(URI :SCHEME "ftp" :USERINFO NIL :HOST "ftp.is.co.za" :PORT "80" :PATH "rfc/rfc1808.txt" :QUERY NIL :FRAGMENT NIL)
+	#S(URI :SCHEME "ftp" :USERINFO NIL :HOST "ftp.is.co.za" :PORT 80 :PATH "rfc/rfc1808.txt" :QUERY NIL :FRAGMENT NIL)
 	
 	(uri-parse "zos://me@hercules.disco.unimib.it:372/myproj.linalg.fortran(svd)?submit=FORTXC#ID=7")
-	#S(URI :SCHEME "zos" :USERINFO "me" :HOST "hercules.disco.unimib.it" :PORT "372" :PATH "myproj.linalg.fortran(svd)" :QUERY "submit=FORTXC" :FRAGMENT "ID=7")
+	#S(URI :SCHEME "zos" :USERINFO "me" :HOST "hercules.disco.unimib.it" :PORT 372 :PATH "myproj.linalg.fortran(svd)" :QUERY "submit=FORTXC" :FRAGMENT "ID=7")
 
 _______________________________
 
@@ -99,6 +99,18 @@ Esempi di chiamata:
 
        (uri-host (uri-parse "tel:+391234567890"))
        NIL
+
+_______________________________
+
+URI-PORT uri-structure -> integer
+Stampa la porta dell'URI. Insieme allo scheme è sempre presente
+
+Esempi di chiamata:
+       (uri-port (uri-parse "http://disco.unimib.it"))
+       80
+
+       (uri-port (uri-parse "https://example.com:443/path/to/file/file.csv#row=4"))
+       443
 
 _______________________________
 
