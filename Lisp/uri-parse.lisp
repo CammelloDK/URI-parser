@@ -440,9 +440,9 @@
 ;; Genera una lista di sottostringhe utilizzando
 ;; come separatore il carattere '.'
 (defun split-by-point (string)
-  (loop for i = 0 then (1+ j)
-        as j = (position '#\. string :start i)
-        collect (subseq string i j)
-        while j))
+  (if (position '#\. string) 
+      (cons (subseq string 0 (position '#\. string)) 
+            (split-by-point(subseq string (1+ (position '#\. string)))))
+    nil))
 
 ;;;; end of file -- uri-parse.lisp
