@@ -1,8 +1,5 @@
 LP_E1P_2022: URI parser
 
-Componenti del gruppo:
-844796 Diego Vismara
-
 
 URI-PARSE string -> uri-structure
 Scompone la stringa nei 7 campi principali di cui è composto un URI:
