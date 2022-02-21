@@ -1,5 +1,4 @@
 ;;;; -*- Mode: Lisp -*-
-;;;; Diego Vismara 844796
 
 ;; Definizione struttura
 ;; :scheme :userinfo :host :port :path :query :fragment
