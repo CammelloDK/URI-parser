@@ -1,5 +1,4 @@
 %%%% -*- Mode: Prolog -*-
-%%%% Diego Vismara 844796
 
 
 uri_parse(URIString, URI) :-
